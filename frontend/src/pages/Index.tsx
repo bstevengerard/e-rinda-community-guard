@@ -77,7 +77,7 @@ const Index = () => {
 
             {/* Title */}
             <h1 className="font-heading text-5xl md:text-7xl font-bold text-primary-foreground mb-6 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-              E-Rinda <span className="text-gradient">MIS</span>
+              E-Rinda MIS
             </h1>
 
             {/* Subtitle */}

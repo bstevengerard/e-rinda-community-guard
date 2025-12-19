@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import { Eye, EyeOff, Shield, LogIn } from "lucide-react";
 import logo from "@/assets/erinda-logo.png";
 import heroBg from "@/assets/hero-bg.jpg";
@@ -11,6 +12,7 @@ import heroBg from "@/assets/hero-bg.jpg";
 const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -26,24 +28,25 @@ const Login = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate login - In production, this would connect to Lovable Cloud
-    setTimeout(() => {
-      if (formData.username && formData.password) {
-        toast({
-          title: "Kwinjira Byagenze Neza!",
-          description: "Murakaza neza muri E-Rinda MIS",
-        });
-        // Navigate to dashboard based on role (placeholder)
-        navigate("/dashboard");
-      } else {
-        toast({
-          title: "Ikosa",
-          description: "Uzuza amazina n'ijambo ry'ibanga",
-          variant: "destructive",
-        });
-      }
+    try {
+      await login(formData);
+      toast({
+        title: "Kwinjira Byagenze Neza!",
+        description: "Murakaza neza muri E-Rinda MIS",
+      });
+      navigate("/dashboard");
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Amazina cyangwa ijambo ry'ibanga sibyo";
+
+      toast({
+        title: "Ikosa",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -131,6 +134,7 @@ const Login = () => {
                   type="button"
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                   onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>

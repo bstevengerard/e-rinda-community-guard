@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { apiService } from "@/lib/api";
 import {
   Calendar,
   FileText,
@@ -25,9 +27,35 @@ import logo from "@/assets/erinda-logo.png";
 const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [dashboardData, setDashboardData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const userRole = user?.role || "UMUNYERONDO";
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const data = await apiService.getDashboardData();
+        setDashboardData(data);
+      } catch (error) {
+        console.error("Failed to fetch dashboard data:", error);
+        toast({
+          title: "Ikosa",
+          description: "Ntibishoboka kubona amakuru ya dashboard",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, [toast]);
 
   const handleLogout = () => {
+    logout();
     toast({
       title: "Gusohoka Byagenze Neza",
       description: "Murakoze gukoresha E-Rinda MIS",
@@ -35,50 +63,81 @@ const Dashboard = () => {
     navigate("/login");
   };
 
-  const menuItems = [
-    { icon: <Home className="w-5 h-5" />, label: "Ahabanza", href: "/dashboard", active: true },
-    { icon: <Calendar className="w-5 h-5" />, label: "Amahazo", href: "/dashboard/attendance" },
-    { icon: <Clock className="w-5 h-5" />, label: "Ikiruhuko", href: "/dashboard/leave" },
-    { icon: <FileText className="w-5 h-5" />, label: "Raporo", href: "/dashboard/reports" },
-    { icon: <Users className="w-5 h-5" />, label: "Abakozi", href: "/dashboard/staff" },
-    { icon: <Bell className="w-5 h-5" />, label: "Amatangazo", href: "/dashboard/announcements" },
-    { icon: <User className="w-5 h-5" />, label: "Porofayile", href: "/dashboard/profile" },
-    { icon: <Settings className="w-5 h-5" />, label: "Igenamiterere", href: "/dashboard/settings" },
-  ];
+  // Role-based menu items
+  const getMenuItems = () => {
+    const baseItems = [
+      { icon: <Home className="w-5 h-5" />, label: "Ahabanza", href: "/dashboard", active: true },
+      { icon: <Calendar className="w-5 h-5" />, label: "Amahazo", href: "/dashboard/attendance" },
+      { icon: <Clock className="w-5 h-5" />, label: "Ikiruhuko", href: "/dashboard/leave" },
+      {icon: <FileText className="w-5 h-5" />, label: "Raporo", href: "/reports" },
+      { icon: <Bell className="w-5 h-5" />, label: "Amatangazo", href: "/dashboard/announcements" },
+      { icon: <User className="w-5 h-5" />, label: "Porofayile", href: "/dashboard/profile" },
+      { icon: <Settings className="w-5 h-5" />, label: "Igenamiterere", href: "/dashboard/settings" },
+    ];
 
-  const stats = [
-    { 
-      icon: <Calendar className="w-6 h-6" />, 
-      value: "22", 
-      label: "Iminsi Yakoze", 
-      color: "bg-accent/20 text-accent" 
-    },
-    { 
-      icon: <Clock className="w-6 h-6" />, 
-      value: "3", 
-      label: "Ikiruhuko Cyasabwe", 
-      color: "bg-secondary/50 text-secondary-foreground" 
-    },
-    { 
-      icon: <FileText className="w-6 h-6" />, 
-      value: "5", 
-      label: "Raporo Zatanzwe", 
-      color: "bg-military/20 text-military" 
-    },
-    { 
-      icon: <CheckCircle className="w-6 h-6" />, 
-      value: "95%", 
-      label: "Amahazo", 
-      color: "bg-primary/20 text-primary" 
-    },
-  ];
+    // Add Staff management for coordinators and above
+    if (["VILLAGE_COORDINATOR", "CELL_COORDINATOR", "SECTOR_COORDINATOR", "SUPER_ADMIN"].includes(userRole)) {
+      baseItems.splice(4, 0, { icon: <Users className="w-5 h-5" />, label: "Abakozi", href: "/dashboard/staff" });
+    }
 
-  const recentActivities = [
-    { title: "Ihazo ry'uyu munsi ryemejwe", time: "Hashize amasaha 2", status: "success" },
-    { title: "Ikiruhuko cyasabwe", time: "Hashize umunsi 1", status: "pending" },
-    { title: "Raporo y'ikibazo yatanzwe", time: "Hashize iminsi 2", status: "success" },
-    { title: "Itangazo rishya ryashyizwe", time: "Hashize iminsi 3", status: "info" },
-  ];
+    return baseItems;
+  };
+
+  const menuItems = getMenuItems();
+
+  // Role-based stats
+  const getStats = () => {
+    const baseStats = [
+      {
+        icon: <Calendar className="w-6 h-6" />,
+        value: "22",
+        label: "Iminsi Yakoze",
+        color: "bg-accent/20 text-accent"
+      },
+      {
+        icon: <Clock className="w-6 h-6" />,
+        value: "3",
+        label: "Ikiruhuko Cyasabwe",
+        color: "bg-secondary/50 text-secondary-foreground"
+      },
+      {
+        icon: <FileText className="w-6 h-6" />,
+        value: "5",
+        label: "Raporo Zatanzwe",
+        color: "bg-military/20 text-military"
+      },
+      {
+        icon: <CheckCircle className="w-6 h-6" />,
+        value: "95%",
+        label: "Amahazo",
+        color: "bg-primary/20 text-primary"
+      },
+    ];
+
+    // Add coordinator-specific stats
+    if (["VILLAGE_COORDINATOR", "CELL_COORDINATOR", "SECTOR_COORDINATOR", "SUPER_ADMIN"].includes(userRole)) {
+      baseStats.splice(2, 0, {
+        icon: <Users className="w-6 h-6" />,
+        value: "12",
+        label: "Abakozi Bafite",
+        color: "bg-primary/20 text-primary"
+      });
+      baseStats.splice(3, 0, {
+        icon: <AlertTriangle className="w-6 h-6" />,
+        value: "3",
+        label: "Ikiruhuko Cyitezwe",
+        color: "bg-destructive/20 text-destructive"
+      });
+      // Remove one stat to keep it to 4
+      baseStats.pop();
+    }
+
+    return baseStats;
+  };
+
+  const stats = getStats();
+
+  const recentActivities = dashboardData?.recent_activities || [];
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -112,8 +171,8 @@ const Dashboard = () => {
               <User className="w-6 h-6 text-sidebar-foreground" />
             </div>
             <div>
-              <p className="font-medium text-sidebar-foreground">Jean UWIMANA</p>
-              <p className="text-sm text-sidebar-foreground/60">UMUNYERONDO</p>
+              <p className="font-medium text-sidebar-foreground">{user?.username || "User"}</p>
+              <p className="text-sm text-sidebar-foreground/60">{user?.role || "UMUNYERONDO"}</p>
             </div>
           </div>
         </div>
@@ -183,22 +242,31 @@ const Dashboard = () => {
 
         {/* Dashboard Content */}
         <main className="p-6">
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {stats.map((stat, index) => (
-              <div
-                key={index}
-                className="bg-card rounded-xl p-6 border border-border hover:shadow-md transition-all duration-300 animate-fade-in"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <div className={`w-12 h-12 rounded-lg ${stat.color} flex items-center justify-center mb-4`}>
-                  {stat.icon}
-                </div>
-                <p className="font-heading text-3xl font-bold text-foreground mb-1">{stat.value}</p>
-                <p className="text-sm text-muted-foreground">{stat.label}</p>
+          {loading ? (
+            <div className="flex items-center justify-center min-h-[400px]">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                <p className="text-muted-foreground">Loading dashboard data...</p>
               </div>
-            ))}
-          </div>
+            </div>
+          ) : (
+            <>
+              {/* Stats Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                {stats.map((stat, index) => (
+                  <div
+                    key={index}
+                    className="bg-card rounded-xl p-6 border border-border hover:shadow-md transition-all duration-300 animate-fade-in"
+                    style={{ animationDelay: `${index * 0.1}s` }}
+                  >
+                    <div className={`w-12 h-12 rounded-lg ${stat.color} flex items-center justify-center mb-4`}>
+                      {stat.icon}
+                    </div>
+                    <p className="font-heading text-3xl font-bold text-foreground mb-1">{stat.value}</p>
+                    <p className="text-sm text-muted-foreground">{stat.label}</p>
+                  </div>
+                ))}
+              </div>
 
           {/* Main Grid */}
           <div className="grid lg:grid-cols-3 gap-6">
@@ -224,8 +292,14 @@ const Dashboard = () => {
                   </div>
                 ))}
                 {[...Array(31)].map((_, i) => {
-                  const isWorked = i < 22;
-                  const isLeave = i === 15 || i === 16;
+                  const dayNumber = i + 1;
+                  const attendanceRecord = dashboardData?.calendar_data?.find(
+                    (record) => new Date(record.date).getDate() === dayNumber
+                  );
+                  const status = attendanceRecord?.status || "absent";
+                  const isWorked = status === "present";
+                  const isLeave = status === "leave";
+
                   return (
                     <div
                       key={i}
@@ -237,7 +311,7 @@ const Dashboard = () => {
                           : "bg-muted text-muted-foreground"
                       }`}
                     >
-                      {i + 1}
+                      {dayNumber}
                     </div>
                   );
                 })}
@@ -318,7 +392,7 @@ const Dashboard = () => {
                 <p className="font-medium text-foreground">Saba Ikiruhuko</p>
               </div>
             </Link>
-            <Link to="/dashboard/reports">
+            <Link to="/reports">
               <div className="bg-card rounded-xl p-6 border border-border hover:border-accent hover:shadow-md transition-all duration-300 text-center group">
                 <div className="w-14 h-14 rounded-xl bg-military/10 flex items-center justify-center mx-auto mb-4 group-hover:bg-accent group-hover:text-accent-foreground transition-all">
                   <FileText className="w-7 h-7 text-military group-hover:text-accent-foreground" />
@@ -335,6 +409,8 @@ const Dashboard = () => {
               </div>
             </Link>
           </div>
+            </>
+          )}
         </main>
       </div>
 

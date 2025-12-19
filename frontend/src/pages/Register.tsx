@@ -4,19 +4,23 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import { Eye, EyeOff, Shield, UserPlus, ChevronDown } from "lucide-react";
 import logo from "@/assets/erinda-logo.png";
 import heroBg from "@/assets/hero-bg.jpg";
 
 const DISTRICTS = ["Kicukiro", "Nyarugenge", "Gasabo"];
-const ROLES = ["UMUNYERONDO", "COORDINATOR"];
+const ROLES = ["UMUNYERONDO", "VILLAGE_COORDINATOR", "CELL_COORDINATOR", "SECTOR_COORDINATOR", "SUPER_ADMIN"];
 
 const Register = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { register } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
+    username: "",
+    email: "",
     fullName: "",
     idNumber: "",
     dateOfBirth: "",
@@ -36,7 +40,7 @@ const Register = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (formData.password !== formData.confirmPassword) {
       toast({
         title: "Ikosa",
@@ -48,15 +52,36 @@ const Register = () => {
 
     setIsLoading(true);
 
-    // Simulate registration - In production, this would connect to Lovable Cloud
-    setTimeout(() => {
+    try {
+      await register({
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        full_name: formData.fullName,
+        national_id: formData.idNumber,
+        date_of_birth: formData.dateOfBirth,
+        phone_number: formData.telephone,
+        role: formData.role,
+        district: formData.district,
+        sector: formData.sector,
+        cell: formData.cell,
+        village: formData.village,
+      });
+
       toast({
         title: "Kwiyandikisha Byagenze Neza!",
-        description: "Konti yawe yaremwe. Injira ubu.",
+        description: "Konti yawe yaremwe. Urakaza neza.",
       });
-      navigate("/login");
+      navigate("/dashboard");
+    } catch (error: any) {
+      toast({
+        title: "Ikosa",
+        description: error.message || "Hari ikosa ryabaye. Ongera ugerageze.",
+        variant: "destructive",
+      });
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -116,6 +141,38 @@ const Register = () => {
               </h3>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Username */}
+                <div className="space-y-2">
+                  <Label htmlFor="username" className="text-foreground font-medium">
+                    Amazina (Username)
+                  </Label>
+                  <Input
+                    id="username"
+                    name="username"
+                    type="text"
+                    placeholder="Andika amazina yawe"
+                    value={formData.username}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+
+                {/* Email */}
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-foreground font-medium">
+                    Imeyili (Email)
+                  </Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="example@email.com"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+
                 {/* Full Name */}
                 <div className="space-y-2">
                   <Label htmlFor="fullName" className="text-foreground font-medium">
