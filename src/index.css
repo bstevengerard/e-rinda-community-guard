@@ -1,0 +1,217 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* E-Rinda MIS Color System - Rwandan Military/Security Theme */
+    --background: 39 41% 92%;
+    --foreground: 0 0% 7%;
+
+    --card: 39 41% 95%;
+    --card-foreground: 0 0% 7%;
+
+    --popover: 39 41% 95%;
+    --popover-foreground: 0 0% 7%;
+
+    /* Primary: Chocolate Brown */
+    --primary: 27 36% 26%;
+    --primary-foreground: 39 41% 95%;
+
+    /* Secondary: Khaki */
+    --secondary: 39 36% 61%;
+    --secondary-foreground: 0 0% 7%;
+
+    /* Muted: Sand Light */
+    --muted: 39 30% 85%;
+    --muted-foreground: 27 20% 35%;
+
+    /* Accent: Gold */
+    --accent: 45 93% 47%;
+    --accent-foreground: 0 0% 7%;
+
+    /* Military Green */
+    --military: 120 25% 25%;
+    --military-foreground: 39 41% 95%;
+
+    /* Dark */
+    --dark: 0 0% 7%;
+    --dark-foreground: 39 41% 95%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 39 41% 95%;
+
+    --border: 39 25% 75%;
+    --input: 39 25% 80%;
+    --ring: 27 36% 26%;
+
+    --radius: 0.75rem;
+
+    /* Custom gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(27 36% 26%) 0%, hsl(0 0% 7%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(39 41% 95%) 0%, hsl(39 30% 90%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(45 93% 47%) 0%, hsl(39 36% 61%) 100%);
+    --gradient-military: linear-gradient(135deg, hsl(120 25% 25%) 0%, hsl(27 36% 26%) 100%);
+
+    /* Shadows */
+    --shadow-sm: 0 2px 8px -2px hsl(27 36% 26% / 0.15);
+    --shadow-md: 0 8px 24px -4px hsl(27 36% 26% / 0.2);
+    --shadow-lg: 0 16px 48px -8px hsl(27 36% 26% / 0.25);
+    --shadow-glow: 0 0 40px hsl(45 93% 47% / 0.3);
+
+    --sidebar-background: 27 36% 20%;
+    --sidebar-foreground: 39 41% 95%;
+    --sidebar-primary: 45 93% 47%;
+    --sidebar-primary-foreground: 0 0% 7%;
+    --sidebar-accent: 27 36% 30%;
+    --sidebar-accent-foreground: 39 41% 95%;
+    --sidebar-border: 27 30% 25%;
+    --sidebar-ring: 45 93% 47%;
+  }
+
+  .dark {
+    --background: 0 0% 7%;
+    --foreground: 39 41% 95%;
+
+    --card: 0 0% 12%;
+    --card-foreground: 39 41% 95%;
+
+    --popover: 0 0% 12%;
+    --popover-foreground: 39 41% 95%;
+
+    --primary: 39 36% 61%;
+    --primary-foreground: 0 0% 7%;
+
+    --secondary: 27 36% 26%;
+    --secondary-foreground: 39 41% 95%;
+
+    --muted: 0 0% 15%;
+    --muted-foreground: 39 30% 70%;
+
+    --accent: 45 93% 47%;
+    --accent-foreground: 0 0% 7%;
+
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 39 41% 95%;
+
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 39 36% 61%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Poppins', sans-serif;
+  }
+}
+
+@layer components {
+  .glass-effect {
+    @apply backdrop-blur-md bg-card/80 border border-border/50;
+  }
+
+  .hero-gradient {
+    background: var(--gradient-hero);
+  }
+
+  .accent-gradient {
+    background: var(--gradient-accent);
+  }
+
+  .military-gradient {
+    background: var(--gradient-military);
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background: var(--gradient-accent);
+  }
+
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.6s ease-out forwards;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.8s ease-out forwards;
+  }
+}
+
+@layer utilities {
+  .pattern-grid {
+    background-image: 
+      linear-gradient(to right, hsl(27 36% 26% / 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(27 36% 26% / 0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .pattern-dots {
+    background-image: radial-gradient(circle, hsl(27 36% 26% / 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
